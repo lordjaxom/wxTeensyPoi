@@ -205,19 +205,18 @@ void PoiFrame::OnToolBarSave()
 
 void PoiFrame::OnToolBarAdd()
 {
+    wxLogNull logNull;
+
     wxFileDialog fileDialog { this, wxFileSelectorPromptStr, wxEmptyString, wxEmptyString, "PNG files (*.png)|*.png" };
     if ( fileDialog.ShowModal() == wxID_CANCEL ) {
         return;
     }
 
-	{
-		wxLogNull logNull;
-		wxImage preview { fileDialog.GetPath() };
-		if ( (size_t) preview.GetHeight() != teensyPoi::pixelCount ) {
-			int newWidth { (int) ( preview.GetWidth() * teensyPoi::pixelCount / preview.GetHeight() ) };
-			preview.Rescale( newWidth, (int) teensyPoi::pixelCount );
-		}
-	}
+    wxImage preview { fileDialog.GetPath() };
+    if ( (size_t) preview.GetHeight() != teensyPoi::pixelCount ) {
+        int newWidth { (int) ( preview.GetWidth() * teensyPoi::pixelCount / preview.GetHeight() ) };
+        preview.Rescale( newWidth, (int) teensyPoi::pixelCount );
+    }
 
     PoiImage image { teensyPoi::pixelCount * 4, imageToData( preview ) };
     AddImageListItem( imageList_->GetItemCount(), structure_.AddImage( std::move( image ) ) );
