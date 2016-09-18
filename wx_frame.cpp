@@ -19,15 +19,20 @@ wxImage dataToImage( std::vector< uint8_t > const& data )
 	size_t width { PoiImage::GetLineCount( data ) };
     wxImage result { (int) width, (int) teensyPoi::pixelCount };
     int x {};
-    int y {};
+    int y { (int) teensyPoi::pixelCount - 1 };
     for ( auto it { data.begin() } ; it != data.end() ; ) {
 		++it; // skip global field
         uint8_t b = *it++;
         uint8_t g = *it++;
         uint8_t r = *it++;
         result.SetRGB( x, y, r, g, b );
-        y = ( y + 1 ) % (int) teensyPoi::pixelCount;
-        if ( y == 0 ) ++x;
+        if ( y == 0 ) {
+            y = (int) teensyPoi::pixelCount - 1;
+            ++x;
+        }
+        else {
+            --y;
+        }
     }
     return result;
 }
@@ -37,12 +42,12 @@ std::vector< uint8_t > imageToData( wxImage const& image )
     std::vector< uint8_t > result;
     result.reserve( (size_t) ( image.GetWidth() * image.GetHeight() * 3 ) );
     for ( int x { 0 } ; x < image.GetWidth() ; ++x ) {
-        for ( int y { 0 } ; y < image.GetHeight() ; ++y ) {
+        for ( int y { image.GetHeight() - 1 } ; y >= 0 ; --y ) {
             bool transparent { image.IsTransparent( x, y ) };
             result.push_back( 0xff ); // global field
             result.push_back( transparent ? (uint8_t) 0x00 : image.GetBlue( x, y ) );
-            result.push_back( transparent ? 0x00 : image.GetGreen( x, y ) );
-            result.push_back( transparent ? 0x00 : image.GetRed( x, y ) );
+            result.push_back( transparent ? (uint8_t) 0x00 : image.GetGreen( x, y ) );
+            result.push_back( transparent ? (uint8_t) 0x00 : image.GetRed( x, y ) );
         }
     }
     return result;

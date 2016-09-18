@@ -97,8 +97,8 @@ PoiImage PoiStructure::DeleteImage( size_t index )
 {
     auto it { std::next( images_.begin(), index ) };
     PoiImage image { std::move( *it ) };
-    blocksUsed_ -= it->GetBlocksUsed();
 	it = images_.erase( it );
+    blocksUsed_ -= image.GetBlocksUsed();
 	dirty_ = true;
 	std::for_each( it, images_.end(), []( PoiImage& img ) { img.Dirty( true ); } );
 	return image;
